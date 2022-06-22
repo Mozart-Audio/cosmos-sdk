@@ -19,7 +19,8 @@ const (
 	GasFlagAuto          = "auto"
 
 	// DefaultKeyringBackend
-	DefaultKeyringBackend = keyring.BackendOS
+	//DefaultKeyringBackend = keyring.BackendOS
+	DefaultKeyringBackend = keyring.BackendTest
 
 	// BroadcastBlock defines a tx broadcasting mode where the client waits for
 	// the tx to be committed in a block.

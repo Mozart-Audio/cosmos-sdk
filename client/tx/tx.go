@@ -21,6 +21,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/tx"
 	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 	authsigning "github.com/cosmos/cosmos-sdk/x/auth/signing"
+
+	stdlog "log"
 )
 
 // GenerateOrBroadcastTxCLI will either generate and print and unsigned transaction
@@ -128,10 +130,19 @@ func BroadcastTx(clientCtx client.Context, txf Factory, msgs ...sdk.Msg) error {
 	}
 
 	tx.SetFeeGranter(clientCtx.GetFeeGranterAddress())
+
+	//stdlog.Println(tx.GetTx().GetSigners())
+	//stdlog.Println(tx.GetTx().GetPubKeys())
+	//stdlog.Println(tx.GetTx().GetSignaturesV2())
+
 	err = Sign(txf, clientCtx.GetFromName(), tx, true)
 	if err != nil {
 		return err
 	}
+
+	//stdlog.Println(tx.GetTx().GetSigners())
+	//stdlog.Println(tx.GetTx().GetPubKeys())
+	stdlog.Println(tx.GetTx())
 
 	txBytes, err := clientCtx.TxConfig.TxEncoder()(tx.GetTx())
 	if err != nil {
@@ -143,6 +154,9 @@ func BroadcastTx(clientCtx client.Context, txf Factory, msgs ...sdk.Msg) error {
 	if err != nil {
 		return err
 	}
+	//stdlog.Println(res.GetTx())
+	stdlog.Println(res.Data)
+	stdlog.Println(res.String())
 
 	return clientCtx.PrintProto(res)
 }

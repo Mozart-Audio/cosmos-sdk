@@ -43,6 +43,8 @@ import (
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+
+	stdlog "log"
 )
 
 // AppModuleBasic is the standard form for basic non-dependant elements of an application module.
@@ -294,6 +296,7 @@ func (m *Manager) RegisterInvariants(ir sdk.InvariantRegistry) {
 func (m *Manager) RegisterRoutes(router sdk.Router, queryRouter sdk.QueryRouter, legacyQuerierCdc *codec.LegacyAmino) {
 	for _, module := range m.Modules {
 		if r := module.Route(); !r.Empty() {
+			stdlog.Println("tx route", module.Name(), r.Path())
 			router.AddRoute(r)
 		}
 		if r := module.QuerierRoute(); r != "" {
@@ -317,7 +320,12 @@ func (m *Manager) InitGenesis(ctx sdk.Context, cdc codec.JSONCodec, genesisData 
 			continue
 		}
 
+		stdlog.Println("init genesis", moduleName)
+		stdlog.Println("init data", len(genesisData[moduleName]))
+
 		moduleValUpdates := m.Modules[moduleName].InitGenesis(ctx, cdc, genesisData[moduleName])
+
+		stdlog.Println("finished genesis", moduleName)
 
 		// use these validator updates if provided, the module manager assumes
 		// only one module will update the validator set
@@ -325,9 +333,15 @@ func (m *Manager) InitGenesis(ctx sdk.Context, cdc codec.JSONCodec, genesisData 
 			if len(validatorUpdates) > 0 {
 				panic("validator InitGenesis updates already set by a previous module")
 			}
+
+			stdlog.Println(moduleName, moduleValUpdates)
 			validatorUpdates = moduleValUpdates
 		}
 	}
+
+	stdlog.Println("len(validatorUpdates)", len(validatorUpdates))
+
+	//stdlog.Println(validatorUpdates[0].Power, validatorUpdates[0].PubKey)
 
 	return abci.ResponseInitChain{
 		Validators: validatorUpdates,

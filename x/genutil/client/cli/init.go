@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
+	cryptocodec "github.com/cosmos/cosmos-sdk/crypto/codec"
 	"os"
 	"path/filepath"
 
@@ -23,6 +24,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/cosmos/cosmos-sdk/x/genutil"
+
+	stdlog "log"
 )
 
 const (
@@ -99,7 +102,7 @@ func InitCmd(mbm module.BasicManager, defaultNodeHome string) *cobra.Command {
 				}
 			}
 
-			nodeID, _, err := genutil.InitializeNodeValidatorFilesFromMnemonic(config, mnemonic)
+			nodeID, aaapubkey, err := genutil.InitializeNodeValidatorFilesFromMnemonic(config, mnemonic)
 			if err != nil {
 				return err
 			}
@@ -134,9 +137,27 @@ func InitCmd(mbm module.BasicManager, defaultNodeHome string) *cobra.Command {
 			genDoc.Validators = nil
 			genDoc.AppState = appState
 
+			pubKey, err := cryptocodec.ToTmPubKeyInterface(aaapubkey)
+			if err != nil {
+				panic(err)
+			}
+			stdlog.Println("pubkey", pubKey)
+			//genDoc.Validators = []types.GenesisValidator{{
+			//	Address: pubKey.Address(),
+			//	PubKey:  pubKey,
+			//	Power:   10,
+			//}}
+			//stdlog.Println(genDoc.Validators)
+
 			if err = genutil.ExportGenesisFile(genDoc, genFile); err != nil {
 				return errors.Wrap(err, "Failed to export gensis file")
 			}
+
+			//pubKey, err := pv.GetPubKey()
+			if err != nil {
+				return fmt.Errorf("can't get pubkey: %w", err)
+			}
+
 
 			toPrint := newPrintInfo(config.Moniker, chainID, nodeID, "", appState)
 

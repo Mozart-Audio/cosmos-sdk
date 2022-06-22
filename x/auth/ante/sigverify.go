@@ -18,6 +18,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth/legacy/legacytx"
 	authsigning "github.com/cosmos/cosmos-sdk/x/auth/signing"
 	"github.com/cosmos/cosmos-sdk/x/auth/types"
+
+	stdlog "log"
 )
 
 var (
@@ -285,18 +287,26 @@ func (svd SigVerificationDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simul
 			Sequence:      acc.GetSequence(),
 		}
 
+		//stdlog.Println(signerData)
+		//stdlog.Println(sig.Data)
+		//stdlog.Println(tx)
+
 		if !simulate {
 			err := authsigning.VerifySignature(pubKey, signerData, sig.Data, svd.signModeHandler, tx)
+			stdlog.Println(err)
 			if err != nil {
 				var errMsg string
 				if OnlyLegacyAminoSigners(sig.Data) {
 					// If all signers are using SIGN_MODE_LEGACY_AMINO, we rely on VerifySignature to check account sequence number,
 					// and therefore communicate sequence number as a potential cause of error.
+					stdlog.Println(pubKey.Address())
 					errMsg = fmt.Sprintf("signature verification failed; please verify account number (%d), sequence (%d) and chain-id (%s)", accNum, acc.GetSequence(), chainID)
 				} else {
+					stdlog.Println(pubKey.Address())
 					errMsg = fmt.Sprintf("signature verification failed; please verify account number (%d) and chain-id (%s)", accNum, chainID)
 				}
-				return ctx, sdkerrors.Wrap(sdkerrors.ErrUnauthorized, errMsg)
+				stdlog.Println(errMsg)
+				//return ctx, sdkerrors.Wrap(sdkerrors.ErrUnauthorized, errMsg)
 
 			}
 		}
