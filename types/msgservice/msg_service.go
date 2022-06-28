@@ -8,6 +8,7 @@ import (
 
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	stdlog "log"
 )
 
 // RegisterMsgServiceDesc registers all type_urls from Msg services described
@@ -17,6 +18,8 @@ func RegisterMsgServiceDesc(registry codectypes.InterfaceRegistry, sd *grpc.Serv
 	for _, method := range sd.Methods {
 		fqMethod := fmt.Sprintf("/%s/%s", sd.ServiceName, method.MethodName)
 		methodHandler := method.Handler
+
+		stdlog.Println("registering grpc method", fqMethod)
 
 		// NOTE: This is how we pull the concrete request type for each handler for registering in the InterfaceRegistry.
 		// This approach is maybe a bit hacky, but less hacky than reflecting on the handler object itself.

@@ -88,10 +88,15 @@ func GenerateTx(clientCtx client.Context, txf Factory, msgs ...sdk.Msg) error {
 // given set of messages. It will also simulate gas requirements if necessary.
 // It will return an error upon failure.
 func BroadcastTx(clientCtx client.Context, txf Factory, msgs ...sdk.Msg) error {
+	stdlog.Println("bbbb")
+
 	txf, err := prepareFactory(clientCtx, txf)
 	if err != nil {
+		stdlog.Println(err)
 		return err
 	}
+
+	stdlog.Println("bbbb")
 
 	if txf.SimulateAndExecute() || clientCtx.Simulate {
 		_, adjusted, err := CalculateGas(clientCtx, txf, msgs...)
@@ -106,6 +111,7 @@ func BroadcastTx(clientCtx client.Context, txf Factory, msgs ...sdk.Msg) error {
 	if clientCtx.Simulate {
 		return nil
 	}
+	stdlog.Println("bbbb")
 
 	tx, err := BuildUnsignedTx(txf, msgs...)
 	if err != nil {
@@ -129,6 +135,8 @@ func BroadcastTx(clientCtx client.Context, txf Factory, msgs ...sdk.Msg) error {
 		}
 	}
 
+	stdlog.Println("bbbb")
+
 	tx.SetFeeGranter(clientCtx.GetFeeGranterAddress())
 
 	//stdlog.Println(tx.GetTx().GetSigners())
@@ -140,18 +148,17 @@ func BroadcastTx(clientCtx client.Context, txf Factory, msgs ...sdk.Msg) error {
 		return err
 	}
 
-	//stdlog.Println(tx.GetTx().GetSigners())
-	//stdlog.Println(tx.GetTx().GetPubKeys())
-	stdlog.Println(tx.GetTx())
-
 	txBytes, err := clientCtx.TxConfig.TxEncoder()(tx.GetTx())
 	if err != nil {
 		return err
 	}
 
+	stdlog.Println("bbbb")
+
 	// broadcast to a Tendermint node
 	res, err := clientCtx.BroadcastTx(txBytes)
 	if err != nil {
+		stdlog.Println(err)
 		return err
 	}
 	//stdlog.Println(res.GetTx())

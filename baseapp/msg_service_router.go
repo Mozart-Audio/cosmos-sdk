@@ -11,6 +11,8 @@ import (
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+
+	stdlog "log"
 )
 
 // MsgServiceRouter routes fully-qualified Msg service methods to their handler.
@@ -33,6 +35,7 @@ type MsgServiceHandler = func(ctx sdk.Context, req sdk.Msg) (*sdk.Result, error)
 
 // Handler returns the MsgServiceHandler for a given msg or nil if not found.
 func (msr *MsgServiceRouter) Handler(msg sdk.Msg) MsgServiceHandler {
+	stdlog.Printf("looking for route: %s", sdk.MsgTypeURL(msg))
 	return msr.routes[sdk.MsgTypeURL(msg)]
 }
 

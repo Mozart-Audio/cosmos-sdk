@@ -7,6 +7,7 @@ import (
 	"github.com/gogo/protobuf/jsonpb"
 
 	"github.com/gogo/protobuf/proto"
+	stdlog "log"
 )
 
 // AnyUnpacker is an interface which allows safely unpacking types packed
@@ -112,6 +113,7 @@ func (registry *interfaceRegistry) RegisterInterface(protoName string, iface int
 func (registry *interfaceRegistry) RegisterImplementations(iface interface{}, impls ...proto.Message) {
 	for _, impl := range impls {
 		typeURL := "/" + proto.MessageName(impl)
+		stdlog.Printf("registering implementation, type=%T, typeUrl=%s, msg-type=%T", iface, typeURL, impl)
 		registry.registerImpl(iface, typeURL, impl)
 	}
 }
