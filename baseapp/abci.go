@@ -10,6 +10,8 @@ import (
 	"syscall"
 	"time"
 
+	stdlog "log"
+
 	"github.com/gogo/protobuf/proto"
 	abci "github.com/tendermint/tendermint/abci/types"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
@@ -21,6 +23,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/telemetry"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+
+	//stdlog "log"
 )
 
 // InitChain implements the ABCI interface. It runs the initialization logic
@@ -40,7 +44,6 @@ func (app *BaseApp) InitChain(req abci.RequestInitChain) (res abci.ResponseInitC
 			panic(err)
 		}
 	}
-
 	// initialize the deliver state and check state with a correct header
 	app.setDeliverState(initHeader)
 	app.setCheckState(initHeader)
@@ -60,6 +63,9 @@ func (app *BaseApp) InitChain(req abci.RequestInitChain) (res abci.ResponseInitC
 	app.deliverState.ctx = app.deliverState.ctx.WithBlockGasMeter(sdk.NewInfiniteGasMeter())
 
 	res = app.initChainer(app.deliverState.ctx, req)
+
+	stdlog.Println("req.Validators", len(req.Validators))
+	stdlog.Println("res.Validators", len(res.Validators))
 
 	// sanity check
 	if len(req.Validators) > 0 {
@@ -440,6 +446,9 @@ func (app *BaseApp) Query(req abci.RequestQuery) (res abci.ResponseQuery) {
 	case "custom":
 		return handleQueryCustom(app, path, req)
 	}
+
+	stdlog.Println("baseapp", req.Path)
+	stdlog.Println("path", path)
 
 	return sdkerrors.QueryResultWithDebug(sdkerrors.Wrap(sdkerrors.ErrUnknownRequest, "unknown query path"), app.trace)
 }

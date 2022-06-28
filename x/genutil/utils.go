@@ -3,6 +3,7 @@ package genutil
 import (
 	"encoding/json"
 	"fmt"
+	stdlog "log"
 	"path/filepath"
 	"time"
 
@@ -80,6 +81,10 @@ func InitializeNodeValidatorFilesFromMnemonic(config *cfg.Config, mnemonic strin
 
 	var filePV *privval.FilePV
 	if len(mnemonic) == 0 {
+
+		stdlog.Println(pvKeyFile)
+		stdlog.Println(pvStateFile)
+
 		filePV = privval.LoadOrGenFilePV(pvKeyFile, pvStateFile)
 	} else {
 		privKey := tmed25519.GenPrivKeyFromSecret([]byte(mnemonic))

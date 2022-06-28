@@ -14,6 +14,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/client"
 	cryptocodec "github.com/cosmos/cosmos-sdk/crypto/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	stdlog "log"
 )
 
 // ShowNodeIDCmd - ported from Tendermint, dump node ID to stdout
@@ -74,6 +76,9 @@ func ShowAddressCmd() *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			serverCtx := GetServerContextFromCmd(cmd)
 			cfg := serverCtx.Config
+
+			stdlog.Println(cfg.PrivValidatorKeyFile())
+			stdlog.Println(cfg.PrivValidatorStateFile())
 
 			privValidator := pvm.LoadFilePV(cfg.PrivValidatorKeyFile(), cfg.PrivValidatorStateFile())
 			valConsAddr := (sdk.ConsAddress)(privValidator.GetAddress())

@@ -10,6 +10,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/telemetry"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	
+	//stdlog "log"
 )
 
 const (
@@ -75,6 +77,9 @@ type BaseConfig struct {
 
 // APIConfig defines the API listener configuration.
 type APIConfig struct {
+
+	Bbb string
+
 	// Enable defines if the API server should be enabled.
 	Enable bool `mapstructure:"enable"`
 
@@ -291,6 +296,7 @@ func GetConfig(v *viper.Viper) Config {
 			RPCWriteTimeout:    v.GetUint("api.rpc-write-timeout"),
 			RPCMaxBodyBytes:    v.GetUint("api.rpc-max-body-bytes"),
 			EnableUnsafeCORS:   v.GetBool("api.enabled-unsafe-cors"),
+			Bbb:  v.GetString("api.bbb"),
 		},
 		Rosetta: RosettaConfig{
 			Enable:     v.GetBool("rosetta.enable"),

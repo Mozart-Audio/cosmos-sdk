@@ -30,6 +30,10 @@ import (
 	crgserver "github.com/cosmos/cosmos-sdk/server/rosetta/lib/server"
 	"github.com/cosmos/cosmos-sdk/server/types"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
+
+	"github.com/tendermint/tendermint/privval"
+	stdlog "log"
+	//cryptocodec "github.com/cosmos/cosmos-sdk/crypto/codec"
 )
 
 const (
@@ -242,12 +246,21 @@ func startInProcess(ctx *Context, clientCtx client.Context, appCreator types.App
 		return err
 	}
 
+	stdlog.Println(ctx.Viper.ConfigFileUsed())
+
 	config := config.GetConfig(ctx.Viper)
 	if err := config.ValidateBasic(); err != nil {
 		ctx.Logger.Error("WARNING: The minimum-gas-prices config in app.toml is set to the empty string. " +
 			"This defaults to 0 in the current version, but will error in the next version " +
 			"(SDK v0.45). Please explicitly put the desired minimum-gas-prices in your app.toml.")
 	}
+
+	//config.API.Enable = true
+	//config.GRPC.Enable = true
+	stdlog.Println(cfg.RootDir)
+	stdlog.Println(cfg.BaseConfig.Moniker)
+	stdlog.Println("config.API.Enable", config.API.Enable)
+	stdlog.Println("config.API.Bbb", config.API.Bbb)
 
 	app := appCreator(ctx.Logger, db, traceWriter, ctx.Viper)
 
@@ -269,6 +282,16 @@ func startInProcess(ctx *Context, clientCtx client.Context, appCreator types.App
 	} else {
 		ctx.Logger.Info("starting node with ABCI Tendermint in-process")
 
+		stdlog.Println(cfg.PrivValidatorKeyFile())
+		stdlog.Println(cfg.PrivValidatorStateFile())
+		pv := pvm.LoadOrGenFilePV(cfg.PrivValidatorKeyFile(), cfg.PrivValidatorStateFile())
+		pubkey, _ := pv.GetPubKey()
+
+		//bb, _ := cryptocodec.FromTmPubKeyInterface(pv.GetPubKey())
+		//cc, _ := cryptocodec.ToTmProtoPublicKey(bb)
+
+		stdlog.Println("node address", pubkey.Address())
+
 		tmNode, err = node.NewNode(
 			cfg,
 			pvm.LoadOrGenFilePV(cfg.PrivValidatorKeyFile(), cfg.PrivValidatorStateFile()),
@@ -287,6 +310,8 @@ func startInProcess(ctx *Context, clientCtx client.Context, appCreator types.App
 		}
 	}
 
+
+
 	// Add the tx service to the gRPC router. We only need to register this
 	// service if API or gRPC is enabled, and avoid doing so in the general
 	// case, because it spawns a new local tendermint RPC client.
@@ -298,6 +323,8 @@ func startInProcess(ctx *Context, clientCtx client.Context, appCreator types.App
 	}
 
 	var apiSrv *api.Server
+
+
 	if config.API.Enable {
 		genDoc, err := genDocProvider()
 		if err != nil {
@@ -418,4 +445,50 @@ func startInProcess(ctx *Context, clientCtx client.Context, appCreator types.App
 
 	// wait for signal capture and gracefully return
 	return WaitForQuitSignals()
+}
+
+func abc() {
+	/*
+	   "validators": [
+	     {
+	       "address": "B64A7C259A7C996761E4CF7FA39BB3235147E2A7",
+	       "pub_key": {
+	         "type": "tendermint/PubKeyEd25519",
+	         "value": "UcPfPjwIXNHi04DhmiPbbJiWx2NzV5xEwJlK0GcXrAE="
+	       },
+	       "power": "10",
+	       "name": ""
+	     }
+	   ],
+	*/
+	baseDir := "/Users/jin/code/repos/tmp/xblog/xblog-data/tmpdb-abc001/"
+	privValKeyFile := baseDir + "config/priv_validator_key.json"
+	privValStateFile := baseDir + "data/priv_validator_state.json"
+
+	pv := privval.GenFilePV(privValKeyFile, privValStateFile)
+
+	pubKey, _ := pv.GetPubKey()
+	stdlog.Println(pubKey)
+
+	//bb, _ := cryptocodec.FromTmPubKeyInterface(pubKey)
+	//
+	//cc, _ := cryptocodec.ToTmProtoPublicKey(bb)
+	////tmprotocrypto.
+	//if err != nil {
+	//	panic(err)
+	//}
+	//a := abci.ValidatorUpdate{
+	//	PubKey: cc,node/node.go
+	//	Power: 99,
+	//}
+	//
+	//stdlog.Println(a)
+	////types.GenesisValidator{
+	////	Address: pubKey.Address(),
+	////	PubKey:  pubKey,
+	////	Power:   10,
+	////}
+	//
+	//
+	//return a
 }

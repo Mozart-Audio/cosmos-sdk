@@ -20,6 +20,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/cosmos-sdk/x/auth/legacy/legacytx"
+
+	stdlog "log"
 )
 
 const (
@@ -731,11 +733,22 @@ func (app *BaseApp) runMsgs(ctx sdk.Context, msgs []sdk.Msg, mode runTxMode) (*s
 			err          error
 		)
 
+		stdlog.Printf("msgtype=%T, msg-value=%v, msg_route=%s", msg, msg, sdk.MsgTypeURL(msg))
+		//dd := app.msgServiceRouter.Handler(msg)
+		//stdlog.Println(&dd)
+
 		if handler := app.msgServiceRouter.Handler(msg); handler != nil {
+			stdlog.Printf("using a ADR 031 routing, msg-type=%T, msg-value=%v", msg, msg)
+
 			// ADR 031 request type routing
 			msgResult, err = handler(ctx, msg)
 			eventMsgName = sdk.MsgTypeURL(msg)
+
+
 		} else if legacyMsg, ok := msg.(legacytx.LegacyMsg); ok {
+
+			stdlog.Printf("%T %v", msg, msg)
+
 			// legacy sdk.Msg routing
 			// Assuming that the app developer has migrated all their Msgs to
 			// proto messages and has registered all `Msg services`, then this
@@ -743,13 +756,22 @@ func (app *BaseApp) runMsgs(ctx sdk.Context, msgs []sdk.Msg, mode runTxMode) (*s
 			// registered within the `msgServiceRouter` already.
 			msgRoute := legacyMsg.Route()
 			eventMsgName = legacyMsg.Type()
+
+			stdlog.Printf("legacy route=%s", msgRoute)
+			stdlog.Printf("event msg name=%s", eventMsgName)
+
 			handler := app.router.Route(ctx, msgRoute)
 			if handler == nil {
 				return nil, sdkerrors.Wrapf(sdkerrors.ErrUnknownRequest, "unrecognized message route: %s; message index: %d", msgRoute, i)
 			}
 
 			msgResult, err = handler(ctx, msg)
+
+
 		} else {
+
+			stdlog.Printf("%T %v", msg, msg)
+
 			return nil, sdkerrors.Wrapf(sdkerrors.ErrUnknownRequest, "can't route message %+v", msg)
 		}
 

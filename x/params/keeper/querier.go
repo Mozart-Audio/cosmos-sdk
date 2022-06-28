@@ -8,6 +8,8 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/cosmos-sdk/x/params/types"
 	"github.com/cosmos/cosmos-sdk/x/params/types/proposal"
+
+	stdlog "log"
 )
 
 // NewQuerier returns a new querier handler for the x/params module.
@@ -18,6 +20,7 @@ func NewQuerier(k Keeper, legacyQuerierCdc *codec.LegacyAmino) sdk.Querier {
 			return queryParams(ctx, req, k, legacyQuerierCdc)
 
 		default:
+			stdlog.Println("params")
 			return nil, sdkerrors.Wrapf(sdkerrors.ErrUnknownRequest, "unknown query path: %s", path[0])
 		}
 	}

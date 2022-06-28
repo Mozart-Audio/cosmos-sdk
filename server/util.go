@@ -160,6 +160,7 @@ func InterceptConfigsPreRunHandler(cmd *cobra.Command, customAppConfigTemplate s
 // if it has not been set.
 func GetServerContextFromCmd(cmd *cobra.Command) *Context {
 	if v := cmd.Context().Value(ServerContextKey); v != nil {
+
 		serverCtxPtr := v.(*Context)
 		return serverCtxPtr
 	}

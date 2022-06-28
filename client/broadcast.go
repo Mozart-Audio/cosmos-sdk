@@ -14,6 +14,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/cosmos-sdk/types/tx"
+	stdlog "log"
 )
 
 // BroadcastTx broadcasts a transactions either synchronously or asynchronously
@@ -117,6 +118,8 @@ func (ctx Context) BroadcastTxSync(txBytes []byte) (*sdk.TxResponse, error) {
 	if errRes := CheckTendermintError(err, txBytes); errRes != nil {
 		return errRes, nil
 	}
+
+	stdlog.Println(res)
 
 	return sdk.NewResponseFormatBroadcastTx(res), err
 }

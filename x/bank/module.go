@@ -25,6 +25,8 @@ import (
 	v040 "github.com/cosmos/cosmos-sdk/x/bank/legacy/v040"
 	"github.com/cosmos/cosmos-sdk/x/bank/simulation"
 	"github.com/cosmos/cosmos-sdk/x/bank/types"
+
+	stdlog "log"
 )
 
 var (
@@ -143,6 +145,8 @@ func (am AppModule) InitGenesis(ctx sdk.Context, cdc codec.JSONCodec, data json.
 	start := time.Now()
 	var genesisState types.GenesisState
 	cdc.MustUnmarshalJSON(data, &genesisState)
+
+	stdlog.Println(genesisState.Balances)
 	telemetry.MeasureSince(start, "InitGenesis", "crisis", "unmarshal")
 
 	am.keeper.InitGenesis(ctx, &genesisState)
